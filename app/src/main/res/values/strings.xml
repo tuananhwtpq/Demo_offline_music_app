@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="nav_open">Open</string>
+    <string name="nav_close">Close</string>
+    <string name="visulizer">Visulizer</string>
+    <string name="play">Play</string>
+    <string name="shuffle">Shuffle</string>
+</resources>
