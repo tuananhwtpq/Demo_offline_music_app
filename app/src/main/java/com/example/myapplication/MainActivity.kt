@@ -1,13 +1,18 @@
 package com.example.myapplication
 
+import android.Manifest
 import android.app.ActionBar
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -23,6 +28,17 @@ class MainActivity() : AppCompatActivity() {
     private lateinit var toggle: ActionBarDrawerToggle
 
     private lateinit var binding: ActivityMainBinding
+    private var countNumber = 0
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                binding.coordinatorLayout.visibility = View.VISIBLE
+                binding.emptyStateLayout.emptyStateLayoutFirst.visibility = View.GONE
+            } else {
+                Toast.makeText(this, "You need this permission", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,21 +46,49 @@ class MainActivity() : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        toggle =
-            ActionBarDrawerToggle(
-                this,
-                binding.drawerLayout,
-                R.string.nav_open,
-                R.string.nav_close
-            )
+        checkHasPermission()
+        setupItemToolBar()
+        setupDrawerLayout()
+        handleNavigationItemSelected()
+        handleBottomNavView()
+        hanleGoToSettingButton()
+    }
 
-        binding.drawerLayout.addDrawerListener(toggle)
+    private fun hanleGoToSettingButton() {
+        binding.emptyStateLayout.btnGoToSetting.setOnClickListener {
+            if (countNumber == 0) {
+                requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO)
+                countNumber++
+            } else {
+                goToSetting()
+            }
+        }
+    }
 
-        toggle.syncState()
+    private fun goToSetting() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", "com.example.myapplication", null)
 
-        //supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        setSupportActionBar(binding.myToolbarInclude.toolBarMain)
+        intent.data = uri
+        startActivity(intent)
 
+    }
+
+    private fun checkHasPermission() {
+        val intent = getIntent()
+        val isHasPermission = intent.getBooleanExtra("has_permission", false)
+
+        if (isHasPermission) {
+            binding.coordinatorLayout.visibility = View.VISIBLE
+            binding.emptyStateLayout.emptyStateLayoutFirst.visibility = View.GONE
+
+        } else {
+            binding.coordinatorLayout.visibility = View.GONE
+            binding.emptyStateLayout.emptyStateLayoutFirst.visibility = View.VISIBLE
+        }
+    }
+
+    private fun setupItemToolBar() {
         val btnMenu = binding.myToolbarInclude.btnMenu
         val btnSearch = binding.myToolbarInclude.btnSearch
 
@@ -56,10 +100,9 @@ class MainActivity() : AppCompatActivity() {
             }
         }
 
-        setupDrawerLayout()
-        handleNavigationItemSelected()
-        handleBottomNavView()
-//        handleNavigationClose()
+        btnSearch.setOnClickListener {
+            Toast.makeText(this, "Search icon", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun handleBottomNavView() {
@@ -68,14 +111,30 @@ class MainActivity() : AppCompatActivity() {
     }
 
     private fun setupDrawerLayout() {
-        val drawerWidth = 250
+        toggle =
+            ActionBarDrawerToggle(
+                this,
+                binding.drawerLayout,
+                R.string.nav_open,
+                R.string.nav_close
+            )
+
+        binding.drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+        setSupportActionBar(binding.myToolbarInclude.toolBarMain)
+
+        val drawerWidth = 350
+        val drawerHeight = 50
         val destiny = resources.displayMetrics.density
-        val slideRange = (drawerWidth * destiny).toInt()
+        val slideRangeX = (drawerWidth * destiny).toInt()
+        val slideRangeY = (drawerHeight * destiny).toInt()
 
         binding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
-                val slideX = slideRange * slideOffset
+                val slideX = slideRangeX * slideOffset
+                val slideY = slideRangeY * slideOffset
                 binding.mainLayout.translationX = slideX
+                binding.mainLayout.translationY = slideY
             }
 
             override fun onDrawerOpened(drawerView: View) {}
@@ -85,21 +144,6 @@ class MainActivity() : AppCompatActivity() {
             override fun onDrawerStateChanged(newState: Int) {}
         })
     }
-
-
-    private fun handleNavigationClose() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    binding.drawerLayout.closeDrawer(GravityCompat.START)
-                } else {
-                    finish()
-                }
-            }
-
-        })
-    }
-
 
     private fun handleNavigationItemSelected() {
         binding.navigationView.setNavigationItemSelectedListener(

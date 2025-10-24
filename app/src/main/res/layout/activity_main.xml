@@ -20,18 +20,32 @@
             layout="@layout/custom_tool_bar" />
 
         <include
-            android:id="@+id/two_button_layout"
-            layout="@layout/two_button_layout"/>
+            android:id="@+id/empty_state_layout"
+            layout="@layout/empty_state_layout"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/coordinator_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <include
+                android:id="@+id/two_button_layout"
+                layout="@layout/two_button_layout" />
+
             <FrameLayout
                 android:id="@+id/fragment_container_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+
+
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_main"
@@ -57,17 +71,13 @@
                     android:id="@+id/bottom_nav_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    app:itemTextColor="@color/bottom_nav_color"
-                    app:itemIconTint="@color/bottom_nav_color"
                     android:background="@android:color/transparent"
+                    app:itemIconTint="@color/bottom_nav_color"
+                    app:itemTextColor="@color/bottom_nav_color"
                     app:menu="@menu/bottom_nav_menu" />
 
             </com.google.android.material.bottomappbar.BottomAppBar>
-
-
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
 
     </LinearLayout>
 
